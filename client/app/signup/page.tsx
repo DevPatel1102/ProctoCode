@@ -25,7 +25,7 @@ export default function SignupPage() {
               Start as a student or spin up isolated sessions as an admin.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-slate-300">
-              Every account enters the same Ghost-Proof platform, but the experience
+              Every account enters the same ProctoCode platform, but the experience
               stays role-specific so session ownership, monitoring, and trust scoring are
               kept clean.
             </p>

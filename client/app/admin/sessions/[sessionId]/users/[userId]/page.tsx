@@ -141,6 +141,7 @@ export default async function AdminUserMonitorPage({ params }: PageProps) {
         sessionCode={session.sessionCode}
         userEmail={user.email}
         initialEvents={events}
+        token={token}
       />
     </main>
   );

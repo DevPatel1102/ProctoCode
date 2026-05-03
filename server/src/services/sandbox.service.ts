@@ -23,19 +23,85 @@ type CommandConfig = {
 
 const EXECUTION_TIMEOUT_MS = 5_000;
 const OUTPUT_LIMIT = 8_000;
+const MAX_MEMORY_MB = 64;
+
+// Dangerous patterns that indicate filesystem/network/process abuse
+const DANGEROUS_JS_PATTERNS = [
+  /require\s*\(\s*['"`]child_process['"`]\s*\)/i,
+  /require\s*\(\s*['"`]fs['"`]\s*\)/i,
+  /require\s*\(\s*['"`]net['"`]\s*\)/i,
+  /require\s*\(\s*['"`]http['"`]\s*\)/i,
+  /require\s*\(\s*['"`]https['"`]\s*\)/i,
+  /require\s*\(\s*['"`]dgram['"`]\s*\)/i,
+  /require\s*\(\s*['"`]cluster['"`]\s*\)/i,
+  /require\s*\(\s*['"`]worker_threads['"`]\s*\)/i,
+  /from\s+['"`]child_process['"`]/i,
+  /from\s+['"`]fs['"`]/i,
+  /from\s+['"`]fs\/promises['"`]/i,
+  /from\s+['"`]net['"`]/i,
+  /from\s+['"`]node:/i,
+  /process\.env/i,
+  /process\.exit/i,
+  /process\.kill/i
+];
+
+const DANGEROUS_PYTHON_PATTERNS = [
+  /import\s+subprocess/i,
+  /from\s+subprocess/i,
+  /import\s+shutil/i,
+  /import\s+socket/i,
+  /from\s+socket/i,
+  /import\s+http/i,
+  /import\s+urllib/i,
+  /from\s+urllib/i,
+  /import\s+requests/i,
+  /os\.system\s*\(/i,
+  /os\.popen\s*\(/i,
+  /os\.exec/i,
+  /os\.spawn/i,
+  /os\.environ/i,
+  /os\.remove/i,
+  /os\.unlink/i,
+  /os\.rmdir/i,
+  /__import__\s*\(/i,
+  /eval\s*\(/i,
+  /exec\s*\(/i,
+  /open\s*\([^)]*['"`]\/etc/i,
+  /open\s*\([^)]*['"`]\/proc/i
+];
+
+function validateCode(code: string, language: SandboxLanguage): string | null {
+  const patterns =
+    language === "python" ? DANGEROUS_PYTHON_PATTERNS : DANGEROUS_JS_PATTERNS;
+
+  for (const pattern of patterns) {
+    if (pattern.test(code)) {
+      return `Blocked: Code contains a restricted pattern (${pattern.source}). Only standard I/O operations are allowed.`;
+    }
+  }
+
+  return null;
+}
 
 function getCommandConfig(language: SandboxLanguage, filePath: string): CommandConfig {
   if (language === "python") {
     return {
       command: "python3",
-      args: [filePath],
+      // -I = isolated mode: no user site-packages, PYTHONPATH ignored, no .pth files
+      // -S = skip importing site module
+      args: ["-I", "-S", filePath],
       extension: "py"
     };
   }
 
   return {
     command: process.execPath,
-    args: ["runner.mjs"],
+    args: [
+      `--max-old-space-size=${MAX_MEMORY_MB}`,
+      "--no-warnings",
+      "--disallow-code-generation-from-strings",
+      "runner.mjs"
+    ],
     extension: "js",
     prepare: async (tempDir) => {
       const runnerPath = path.join(tempDir, "runner.mjs");
@@ -91,8 +157,32 @@ function trimOutput(value: string) {
   return `${value.slice(0, OUTPUT_LIMIT)}\n...output truncated...`;
 }
 
+// Minimal, stripped-down environment — no secrets or shell access
+function getSandboxEnv(): Record<string, string> {
+  return {
+    PATH: "/usr/local/bin:/usr/bin:/bin",
+    HOME: "/tmp",
+    LANG: "en_US.UTF-8",
+    PYTHONUNBUFFERED: "1",
+    PYTHONDONTWRITEBYTECODE: "1",
+    NODE_ENV: "production"
+  };
+}
+
 export async function runCode({ code, language }: RunCodeInput) {
-  const tempDir = await mkdtemp(path.join(os.tmpdir(), "ghost-proof-"));
+  // Validate code against dangerous patterns before execution
+  const validationError = validateCode(code, language);
+  if (validationError) {
+    return {
+      stdout: "",
+      stderr: validationError,
+      exitCode: 1,
+      timedOut: false,
+      success: false
+    };
+  }
+
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "proctocode-"));
   const config = getCommandConfig(language, "");
   const filePath = path.join(tempDir, `snippet.${config.extension}`);
 
@@ -117,10 +207,7 @@ export async function runCode({ code, language }: RunCodeInput) {
           timeout: EXECUTION_TIMEOUT_MS,
           killSignal: "SIGKILL",
           maxBuffer: OUTPUT_LIMIT,
-          env: {
-            PATH: process.env.PATH,
-            PYTHONUNBUFFERED: "1"
-          }
+          env: getSandboxEnv()
         },
         (error, stdout, stderr) => {
           const finishWithCollectedOutput = async (

@@ -9,7 +9,7 @@ export default function LoginPage() {
         <section className="panel-surface hidden rounded-[2rem] p-8 lg:flex lg:flex-col lg:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.38em] text-cyan-300/80">
-              Ghost-Proof Access
+              ProctoCode Access
             </p>
             <h1 className="mt-5 max-w-xl text-5xl font-semibold leading-tight text-white">
               Production-style interview access for admins and students.

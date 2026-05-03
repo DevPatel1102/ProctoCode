@@ -1,5 +1,5 @@
-export const SESSION_ID_COOKIE_NAME = "gp_session_id";
-export const SESSION_CODE_COOKIE_NAME = "gp_session_code";
+export const SESSION_ID_COOKIE_NAME = "pc_session_id";
+export const SESSION_CODE_COOKIE_NAME = "pc_session_code";
 
 export type CurrentSession = {
   sessionId: string;

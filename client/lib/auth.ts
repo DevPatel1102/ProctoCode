@@ -1,4 +1,4 @@
-export const AUTH_COOKIE_NAME = "gp_token";
+export const AUTH_COOKIE_NAME = "pc_token";
 
 export type UserRole = "admin" | "candidate";
 
@@ -40,3 +40,20 @@ export type AuthApiResponse = {
     role: UserRole;
   };
 };
+
+export function getAuthTokenFromBrowser(): string | null {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${AUTH_COOKIE_NAME}=`));
+
+  if (!cookie) {
+    return null;
+  }
+
+  const value = cookie.substring(AUTH_COOKIE_NAME.length + 1);
+  return decodeURIComponent(value);
+}

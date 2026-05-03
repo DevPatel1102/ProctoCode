@@ -21,7 +21,7 @@ router.use("/trust-score", trustScoreRouter);
 router.get("/health", (_request, response) => {
   response.status(200).json({
     ok: true,
-    service: "ghost-proof-server",
+    service: "proctocode-server",
     timestamp: new Date().toISOString()
   });
 });

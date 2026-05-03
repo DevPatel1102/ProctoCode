@@ -11,7 +11,7 @@ import {
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ghost-Proof",
+  title: "ProctoCode",
   description: "Web-based proctoring and interview sandbox"
 };
 
@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('gp_theme');
+                  var theme = localStorage.getItem('pc_theme');
                   if (theme === 'light' || theme === 'dark') {
                     document.documentElement.setAttribute('data-theme', theme);
                   }

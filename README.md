@@ -1,11 +1,11 @@
-# Ghost-Proof
+# ProctoCode
 
-Ghost-Proof is a production-oriented MERN project for proctoring and interview monitoring. This setup phase includes only the project foundation: a `client` app for the frontend and a `server` app for the backend.
+ProctoCode is a production-oriented MERN project for proctoring and interview monitoring. This setup phase includes only the project foundation: a `client` app for the frontend and a `server` app for the backend.
 
 ## Folder structure
 
 ```text
-ghost-proof/
+proctocode/
 ├── client/
 │   ├── app/                  # Next.js App Router pages and layouts
 │   ├── components/           # Reusable frontend components
@@ -68,7 +68,7 @@ You can also run them separately:
 
 ## OTP email setup
 
-Ghost-Proof now sends password reset OTP codes through SMTP. You can use Gmail app passwords, Mailtrap, Resend SMTP, SendGrid SMTP, or another SMTP-compatible provider.
+ProctoCode now sends password reset OTP codes through SMTP. You can use Gmail app passwords, Mailtrap, Resend SMTP, SendGrid SMTP, or another SMTP-compatible provider.
 
 Required server environment variables:
 

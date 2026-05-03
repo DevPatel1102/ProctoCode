@@ -51,8 +51,40 @@ async function getEvents() {
   return data.events;
 }
 
+async function getSessionIds() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+
+  if (!token) {
+    return [];
+  }
+
+  const response = await fetch(`${getBackendUrl()}/api/sessions`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = (await response.json()) as {
+    sessions: Array<{ id: string }>;
+  };
+  return data.sessions.map((session) => session.id);
+}
+
 export default async function EvaluatorPage() {
-  const [users, events] = await Promise.all([getUsers(), getEvents()]);
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+
+  const [users, events, sessionIds] = await Promise.all([
+    getUsers(),
+    getEvents(),
+    getSessionIds()
+  ]);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-10">
@@ -84,7 +116,13 @@ export default async function EvaluatorPage() {
         </div>
       </div>
 
-      <EvaluatorDashboard initialUsers={users} initialEvents={events} />
+      <EvaluatorDashboard
+        initialUsers={users}
+        initialEvents={events}
+        sessionIds={sessionIds}
+        token={token ?? ""}
+      />
     </main>
   );
 }
+

@@ -5,11 +5,11 @@ export const codeTemplates: Record<SandboxLanguage, string> = {
   return "Hello, " + name + "!";
 }
 
-console.log(greet("Ghost-Proof"));`,
+console.log(greet("ProctoCode"));`,
   python: `def greet(name):
     return f"Hello, {name}!"
 
-print(greet("Ghost-Proof"))`
+print(greet("ProctoCode"))`
 };
 
 export const languageOptions: Array<{

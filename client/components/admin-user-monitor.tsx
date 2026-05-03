@@ -14,6 +14,7 @@ import {
 import { io, type Socket } from "socket.io-client";
 
 import { getSocketUrl, type LiveBehaviorEvent } from "@/lib/monitor";
+import { getAuthTokenFromBrowser } from "@/lib/auth";
 
 type AdminUserMonitorProps = {
   sessionId: string;
@@ -21,6 +22,7 @@ type AdminUserMonitorProps = {
   sessionCode: string;
   userEmail: string;
   initialEvents: LiveBehaviorEvent[];
+  token: string;
 };
 
 function getEventTone(type: string) {
@@ -44,7 +46,8 @@ export function AdminUserMonitor({
   userId,
   sessionCode,
   userEmail,
-  initialEvents
+  initialEvents,
+  token
 }: AdminUserMonitorProps) {
   const [events, setEvents] = useState<LiveBehaviorEvent[]>(initialEvents);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(
@@ -60,19 +63,25 @@ export function AdminUserMonitor({
   useEffect(() => {
     const socket: Socket = io(getSocketUrl(), {
       transports: ["websocket"],
-      withCredentials: true
+      withCredentials: true,
+      auth: { token }
     });
 
     socket.on("connect", () => {
       setConnectionState("Live");
+      socket.emit("monitor:subscribe", sessionId);
     });
 
     socket.on("disconnect", () => {
       setConnectionState("Disconnected");
     });
 
-    socket.on("connect_error", () => {
-      setConnectionState("Connection error");
+    socket.on("connect_error", (error) => {
+      setConnectionState(
+        error.message === "Authentication required"
+          ? "Auth required"
+          : "Connection error"
+      );
     });
 
     socket.on("behavior:created", (event: LiveBehaviorEvent) => {
@@ -80,11 +89,12 @@ export function AdminUserMonitor({
         return;
       }
 
-      setEvents((current) => [event, ...current].slice(0, 100));
+      console.log("Received live event!", event); setEvents((current) => [event, ...current].slice(0, 100));
       setSelectedEventId((current) => current ?? event.id);
     });
 
     return () => {
+      socket.emit("monitor:unsubscribe", sessionId);
       socket.disconnect();
     };
   }, [sessionId, userId]);

@@ -14,11 +14,11 @@ async function bootstrap() {
   registerSocketServer(httpServer);
 
   httpServer.listen(env.port, () => {
-    console.log(`Ghost-Proof server listening on http://localhost:${env.port}`);
+    console.log(`ProctoCode server listening on http://localhost:${env.port}`);
   });
 }
 
 bootstrap().catch((error: unknown) => {
-  console.error("Failed to start Ghost-Proof server:", error);
+  console.error("Failed to start ProctoCode server:", error);
   process.exit(1);
 });

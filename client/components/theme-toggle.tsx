@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "gp_theme";
+const STORAGE_KEY = "pc_theme";
 
 type ThemeMode = "dark" | "light";
 

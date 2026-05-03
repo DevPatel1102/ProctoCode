@@ -20,8 +20,8 @@ function getOptionalEnv(name: string, fallback?: string) {
 export const env = {
   port: Number(getRequiredEnv("PORT", "5000")),
   clientOrigin: getRequiredEnv("CLIENT_ORIGIN", "http://localhost:3000"),
-  mongodbUri: getRequiredEnv("MONGODB_URI", "mongodb://127.0.0.1:27017/ghost-proof"),
-  jwtSecret: getRequiredEnv("JWT_SECRET", "change-this-in-production"),
+  mongodbUri: getRequiredEnv("MONGODB_URI", "mongodb://127.0.0.1:27017/proctocode"),
+  jwtSecret: getRequiredEnv("JWT_SECRET"),
   jwtExpiresIn: getRequiredEnv("JWT_EXPIRES_IN", "7d"),
   smtpHost: getOptionalEnv("SMTP_HOST"),
   smtpPort: Number(getOptionalEnv("SMTP_PORT", "587")),

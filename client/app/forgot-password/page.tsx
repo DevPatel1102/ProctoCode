@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
               Recover access without breaking the secure interview flow.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-slate-300">
-              Ghost-Proof uses a one-time verification code so password reset stays
+              ProctoCode uses a one-time verification code so password reset stays
               deliberate and tied to the account email.
             </p>
           </div>

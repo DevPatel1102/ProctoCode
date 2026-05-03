@@ -33,7 +33,7 @@ export default async function HomePage() {
       <header className="home-glass flex items-center justify-between rounded-[2rem] px-5 py-4 backdrop-blur sm:px-6">
         <div>
           <p className="text-xs uppercase tracking-[0.38em] text-cyan-300/80">
-            Ghost-Proof
+            ProctoCode
           </p>
           <p className="mt-1 text-sm text-slate-300">
             Proctoring and interview sandbox for real coding sessions
@@ -88,7 +88,7 @@ export default async function HomePage() {
               The coding interview room that helps teams spot signals, not guess.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-              Ghost-Proof gives admins isolated session control, candidates a focused
+              ProctoCode gives admins isolated session control, candidates a focused
               coding environment, and evaluators a structured trail of trust score,
               timeline events, and session history.
             </p>
@@ -232,7 +232,7 @@ export default async function HomePage() {
             Replace guesswork with structured evidence
           </h3>
           <p className="mt-4 text-sm leading-7 text-slate-300">
-            Instead of binary accusations, Ghost-Proof builds a timeline of signals so
+            Instead of binary accusations, ProctoCode builds a timeline of signals so
             evaluators can review behavior with context.
           </p>
         </div>

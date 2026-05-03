@@ -34,19 +34,19 @@ export async function sendPasswordResetOtpEmail(email: string, otp: string) {
   await mailer.sendMail({
     from: env.smtpFrom,
     to: email,
-    subject: "Ghost-Proof password reset OTP",
-    text: `Your Ghost-Proof OTP is ${otp}. It expires in 10 minutes. If you did not request this reset, please ignore this email.`,
+    subject: "ProctoCode password reset OTP",
+    text: `Your ProctoCode OTP is ${otp}. It expires in 10 minutes. If you did not request this reset, please ignore this email.`,
     html: `
       <div style="font-family: Arial, sans-serif; background: #020617; color: #e2e8f0; padding: 32px;">
         <div style="max-width: 560px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 32px;">
           <p style="font-size: 12px; letter-spacing: 0.35em; text-transform: uppercase; color: #67e8f9; margin: 0 0 16px;">
-            Ghost-Proof
+            ProctoCode
           </p>
           <h1 style="font-size: 28px; margin: 0 0 16px; color: #ffffff;">
             Password reset OTP
           </h1>
           <p style="font-size: 16px; line-height: 1.7; margin: 0 0 24px; color: #cbd5e1;">
-            Use the one-time password below to reset your Ghost-Proof account password.
+            Use the one-time password below to reset your ProctoCode account password.
             This code expires in 10 minutes.
           </p>
           <div style="background: rgba(34,211,238,0.12); border: 1px solid rgba(103,232,249,0.35); border-radius: 18px; padding: 18px 20px; font-size: 32px; font-weight: 700; letter-spacing: 0.35em; text-align: center; color: #ffffff;">

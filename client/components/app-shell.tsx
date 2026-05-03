@@ -59,7 +59,7 @@ export function AppShell({
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.38em] text-cyan-300/80">
-                  Ghost-Proof
+                  ProctoCode
                 </p>
                 <h1 className="mt-2 text-2xl font-semibold text-white">
                   {role === "admin" ? "Admin Console" : "Student Workspace"}

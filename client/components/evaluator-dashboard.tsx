@@ -15,15 +15,20 @@ import {
 import { io, type Socket } from "socket.io-client";
 
 import { getSocketUrl, type LiveBehaviorEvent, type MonitorUser } from "@/lib/monitor";
+import { getAuthTokenFromBrowser } from "@/lib/auth";
 
 type EvaluatorDashboardProps = {
   initialUsers: MonitorUser[];
   initialEvents: LiveBehaviorEvent[];
+  sessionIds: string[];
+  token: string;
 };
 
 export function EvaluatorDashboard({
   initialUsers,
-  initialEvents
+  initialEvents,
+  sessionIds,
+  token
 }: EvaluatorDashboardProps) {
   const [events, setEvents] = useState<LiveBehaviorEvent[]>(initialEvents);
   const [connectionState, setConnectionState] = useState("Connecting...");
@@ -35,11 +40,17 @@ export function EvaluatorDashboard({
   useEffect(() => {
     const socket: Socket = io(getSocketUrl(), {
       transports: ["websocket"],
-      withCredentials: true
+      withCredentials: true,
+      auth: { token }
     });
 
     socket.on("connect", () => {
       setConnectionState("Live");
+
+      // Subscribe to all owned session rooms
+      for (const sessionId of sessionIds) {
+        socket.emit("monitor:subscribe", sessionId);
+      }
     });
 
     socket.on("disconnect", () => {
@@ -50,14 +61,18 @@ export function EvaluatorDashboard({
       setEvents((current) => [event, ...current].slice(0, 100));
     });
 
-    socket.on("connect_error", () => {
-      setConnectionState("Connection error");
+    socket.on("connect_error", (error) => {
+      setConnectionState(
+        error.message === "Authentication required"
+          ? "Auth required"
+          : "Connection error"
+      );
     });
 
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [sessionIds]);
 
   const userCounts = useMemo(() => {
     return initialUsers.map((user) => ({

@@ -1,17 +1,26 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { getBackendUrl } from "@/lib/auth";
+import { AUTH_COOKIE_NAME, getBackendUrl } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
   const body = await request.json();
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json"
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   const backendResponse = await fetch(`${getBackendUrl()}/api/sandbox/run`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers,
     body: JSON.stringify(body),
     cache: "no-store"
   });
@@ -22,3 +31,4 @@ export async function POST(request: Request) {
     status: backendResponse.status
   });
 }
+

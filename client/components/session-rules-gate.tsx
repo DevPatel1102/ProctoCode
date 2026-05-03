@@ -9,7 +9,7 @@ type SessionRulesGateProps = {
 };
 
 function getStorageKey(sessionId: string) {
-  return `gp_rules_accepted_${sessionId}`;
+  return `pc_rules_accepted_${sessionId}`;
 }
 
 export function SessionRulesGate({ children }: SessionRulesGateProps) {
@@ -94,7 +94,7 @@ export function SessionRulesGate({ children }: SessionRulesGateProps) {
               <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
                 <p className="font-medium text-white">Use the provided sandbox</p>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Write, edit, and run your solution only inside the Ghost-Proof
+                  Write, edit, and run your solution only inside the ProctoCode
                   coding environment.
                 </p>
               </div>

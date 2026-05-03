@@ -60,7 +60,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     <div className="panel-surface h-full w-full rounded-[2rem] p-8 sm:p-9">
       <div className="space-y-2">
         <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">
-          Ghost-Proof Auth
+          ProctoCode Auth
         </p>
         <h1 className="text-3xl font-semibold text-white sm:text-4xl">
           {isLogin ? "Login" : "Create account"}
