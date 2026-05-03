@@ -28,7 +28,16 @@ async function getOwnedSession(sessionId: string, createdBy: string) {
   return session;
 }
 
-export async function createSession(createdBy: string, sessionName: string) {
+export async function createSession(
+  createdBy: string,
+  sessionName: string,
+  options?: {
+    problemTitle?: string;
+    problemDescription?: string;
+    testCases?: Array<{ input: string; expectedOutput: string; isHidden: boolean }>;
+    durationMinutes?: number;
+  }
+) {
   let attempts = 0;
 
   while (attempts < 10) {
@@ -39,6 +48,10 @@ export async function createSession(createdBy: string, sessionName: string) {
       return Session.create({
         sessionName: sessionName.trim(),
         sessionCode,
+        problemTitle: options?.problemTitle?.trim(),
+        problemDescription: options?.problemDescription,
+        testCases: options?.testCases,
+        durationMinutes: options?.durationMinutes,
         createdBy,
         isActive: true
       });
@@ -137,7 +150,7 @@ export async function listSessionUsers(sessionId: string, createdBy: string) {
 
 export async function listUserSessions(userId: string) {
   return UserSession.find({ userId })
-    .populate("sessionId", "sessionName sessionCode isActive createdAt")
+    .populate("sessionId", "sessionName sessionCode isActive createdAt problemTitle problemDescription durationMinutes testCases")
     .sort({ updatedAt: -1 })
     .lean();
 }
@@ -178,4 +191,23 @@ export async function deleteSessionHistory(sessionId: string, createdBy: string)
   ]);
 
   return session;
+}
+
+export async function submitCandidateCode(userId: string, sessionId: string, code: string) {
+  const userSession = await UserSession.findOne({ userId, sessionId });
+
+  if (!userSession) {
+    throw new Error("User session not found");
+  }
+
+  if (userSession.submittedAt) {
+    throw new Error("You have already submitted your code. Multiple submissions are not allowed.");
+  }
+
+  userSession.submittedCode = code;
+  userSession.submittedAt = new Date();
+  userSession.lastActivity = new Date();
+  await userSession.save();
+
+  return userSession;
 }

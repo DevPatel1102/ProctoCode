@@ -5,7 +5,10 @@ export interface UserSessionDocument {
   sessionId: Types.ObjectId;
   trustScore: number;
   lastActivity: Date;
+  startedAt: Date;
   leftAt?: Date | null;
+  submittedCode?: string | null;
+  submittedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,7 +35,20 @@ const userSessionSchema = new Schema<UserSessionDocument>(
       default: Date.now,
       required: true
     },
+    startedAt: {
+      type: Date,
+      default: Date.now,
+      required: true
+    },
     leftAt: {
+      type: Date,
+      default: null
+    },
+    submittedCode: {
+      type: String,
+      default: null
+    },
+    submittedAt: {
       type: Date,
       default: null
     }

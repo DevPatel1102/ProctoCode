@@ -8,6 +8,7 @@ type SandboxLanguage = "javascript" | "python";
 type RunCodeInput = {
   code: string;
   language: SandboxLanguage;
+  stdin?: string;
 };
 
 type CommandConfig = {
@@ -160,16 +161,16 @@ function trimOutput(value: string) {
 // Minimal, stripped-down environment — no secrets or shell access
 function getSandboxEnv(): Record<string, string> {
   return {
-    PATH: "/usr/local/bin:/usr/bin:/bin",
+    ...process.env,
     HOME: "/tmp",
-    LANG: "en_US.UTF-8",
     PYTHONUNBUFFERED: "1",
     PYTHONDONTWRITEBYTECODE: "1",
+    PYTHONIOENCODING: "utf-8",
     NODE_ENV: "production"
-  };
+  } as Record<string, string>;
 }
 
-export async function runCode({ code, language }: RunCodeInput) {
+export async function runCode({ code, language, stdin }: RunCodeInput) {
   // Validate code against dangerous patterns before execution
   const validationError = validateCode(code, language);
   if (validationError) {
@@ -198,7 +199,7 @@ export async function runCode({ code, language }: RunCodeInput) {
       exitCode: number | null;
       timedOut: boolean;
     }>((resolve, reject) => {
-      execFile(
+      const child = execFile(
         runtime.command,
         runtime.args,
         {
@@ -250,6 +251,11 @@ export async function runCode({ code, language }: RunCodeInput) {
           );
         }
       );
+
+      if (stdin && child.stdin) {
+        child.stdin.write(stdin);
+        child.stdin.end();
+      }
     });
 
     return {
@@ -259,4 +265,102 @@ export async function runCode({ code, language }: RunCodeInput) {
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }
+}
+
+export async function syntaxCheckCode(code: string, language: SandboxLanguage) {
+  const validationError = validateCode(code, language);
+  if (validationError) {
+    return {
+      stdout: "",
+      stderr: validationError,
+      exitCode: 1,
+      success: false
+    };
+  }
+
+  const extension = language === "python" ? "py" : "js";
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "proctocode-check-"));
+  const filePath = path.join(tempDir, `snippet.${extension}`);
+
+  await writeFile(filePath, code, "utf8");
+
+  try {
+    const result = await new Promise<{
+      stdout: string;
+      stderr: string;
+      exitCode: number | null;
+    }>((resolve) => {
+      const command = language === "python" ? "python3" : process.execPath;
+      const args = language === "python"
+        ? ["-m", "py_compile", filePath]
+        : ["--check", filePath];
+
+      execFile(
+        command,
+        args,
+        {
+          cwd: tempDir,
+          timeout: 5000,
+          env: getSandboxEnv()
+        },
+        (error, stdout, stderr) => {
+          if (!error) {
+            resolve({ stdout, stderr, exitCode: 0 });
+            return;
+          }
+
+          const executionError = error as NodeJS.ErrnoException & { code?: number | string };
+          resolve({
+            stdout,
+            stderr: stderr || error.message,
+            exitCode: typeof executionError.code === "number" ? executionError.code : 1
+          });
+        }
+      );
+    });
+
+    return {
+      ...result,
+      success: result.exitCode === 0
+    };
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+}
+
+export type TestCaseResult = {
+  passed: boolean;
+  actualOutput: string;
+  expectedOutput: string;
+  error?: string;
+  isHidden: boolean;
+};
+
+export async function submitCode(
+  code: string,
+  language: SandboxLanguage,
+  testCases: Array<{ input: string; expectedOutput: string; isHidden: boolean }>
+): Promise<TestCaseResult[]> {
+  const results: TestCaseResult[] = [];
+
+  for (const testCase of testCases) {
+    const runResult = await runCode({ code, language, stdin: testCase.input });
+
+    let actualOutput = runResult.stdout.trim();
+    if (!runResult.success) {
+      actualOutput = runResult.stderr.trim() || actualOutput;
+    }
+
+    const passed = runResult.success && actualOutput === testCase.expectedOutput.trim();
+
+    results.push({
+      passed,
+      actualOutput,
+      expectedOutput: testCase.expectedOutput,
+      error: runResult.success ? undefined : runResult.stderr,
+      isHidden: testCase.isHidden
+    });
+  }
+
+  return results;
 }

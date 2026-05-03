@@ -22,7 +22,15 @@ type RunResponse = {
   message?: string;
 };
 
-export function CodeSandbox() {
+export function CodeSandbox({
+  onCodeChange,
+  onLanguageChange,
+  headerActions
+}: {
+  onCodeChange?: (code: string) => void;
+  onLanguageChange?: (language: SandboxLanguage) => void;
+  headerActions?: React.ReactNode;
+} = {}) {
   useBehaviorTracking();
 
   const [language, setLanguage] = useState<SandboxLanguage>("javascript");
@@ -118,6 +126,9 @@ export function CodeSandbox() {
     setCode(codeTemplates[nextLanguage]);
     setResult(null);
 
+    onLanguageChange?.(nextLanguage);
+    onCodeChange?.(codeTemplates[nextLanguage]);
+
     window.setTimeout(() => {
       suppressEditorTrackingRef.current = false;
     }, 0);
@@ -194,7 +205,7 @@ export function CodeSandbox() {
   }
 
   return (
-    <section className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+    <section className="flex flex-col gap-6">
       <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 shadow-xl shadow-slate-950/30">
         <div className="flex flex-col gap-4 border-b border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -202,11 +213,11 @@ export function CodeSandbox() {
               Coding Sandbox
             </p>
             <h2 className="mt-2 text-xl font-semibold text-white">
-              Write and run sample code
+              Write and run code
             </h2>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <select
               value={language}
               onChange={(event) =>
@@ -229,6 +240,7 @@ export function CodeSandbox() {
             >
               {isRunning ? "Running..." : "Run Code"}
             </button>
+            {headerActions}
           </div>
         </div>
 
@@ -238,7 +250,11 @@ export function CodeSandbox() {
           theme="vs-dark"
           value={code}
           onMount={handleEditorMount}
-          onChange={(value) => setCode(value ?? "")}
+          onChange={(value) => {
+            const newCode = value ?? "";
+            setCode(newCode);
+            onCodeChange?.(newCode);
+          }}
           options={{
             minimap: { enabled: false },
             fontSize: 14,
@@ -249,18 +265,19 @@ export function CodeSandbox() {
         />
       </div>
 
-      <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-xl shadow-slate-950/30">
-          <h3 className="text-lg font-semibold text-white">Execution Output</h3>
+          <h3 className="text-lg font-semibold text-white">Syntax Check</h3>
           <p className="mt-2 text-sm text-slate-300">
-            The backend runs code in a short-lived process with a timeout. This is a
-            basic sandbox foundation, not a fully isolated production container yet.
+            Checks your code for syntax errors without executing it.
           </p>
           <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950 p-4">
-            <pre className="min-h-48 whitespace-pre-wrap break-words text-sm text-slate-200">
+            <pre className="min-h-32 whitespace-pre-wrap break-words text-sm text-slate-200">
               {result
-                ? result.stdout || result.stderr || "Program finished with no output."
-                : "Run code to see stdout or stderr here."}
+                ? result.success
+                  ? "✅ Code runs successfully — no syntax errors found."
+                  : `❌ Syntax Error:\n\n${result.stderr || "Unknown error"}`
+                : "Click \"Run Code\" to check for syntax errors."}
             </pre>
           </div>
         </div>
@@ -269,14 +286,8 @@ export function CodeSandbox() {
           <h3 className="text-lg font-semibold text-white">Behavior Tracking</h3>
           <div className="mt-4 space-y-3 text-sm text-slate-300">
             <p>Language: {language}</p>
-            <p>Status: {isRunning ? "Running" : result ? "Completed" : "Idle"}</p>
-            <p>Exit code: {result?.exitCode ?? "N/A"}</p>
-            <p>Timed out: {result?.timedOut ? "Yes" : "No"}</p>
-            <p>Tracked: tab visibility, large paste, inactivity, fast typing.</p>
-            <p>
-              Monaco note: later we can attach editor-specific events such as paste
-              detection directly from the editor instance for more precise signals.
-            </p>
+            <p>Status: {isRunning ? "Checking..." : result ? (result.success ? "Passed" : "Failed") : "Idle"}</p>
+            <p>Tracked: tab visibility, large paste, inactivity.</p>
           </div>
         </div>
       </div>

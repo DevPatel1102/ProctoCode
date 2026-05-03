@@ -8,7 +8,9 @@ import {
   getSessions,
   getSessionUsers,
   joinExistingSession,
-  leaveCurrentSession
+  leaveCurrentSession,
+  candidateCodeSubmit,
+  getSessionReport
 } from "../controllers/session.controller.js";
 import { requireAdmin, requireAuth } from "../middlewares/auth.middleware.js";
 
@@ -19,7 +21,9 @@ sessionRouter.get("/", requireAuth, requireAdmin, getSessions);
 sessionRouter.get("/mine", requireAuth, getMySessions);
 sessionRouter.post("/join", requireAuth, joinExistingSession);
 sessionRouter.post("/leave", requireAuth, leaveCurrentSession);
+sessionRouter.post("/submit-code", requireAuth, candidateCodeSubmit);
 sessionRouter.get("/:id/users", requireAuth, requireAdmin, getSessionUsers);
+sessionRouter.get("/:id/report", requireAuth, requireAdmin, getSessionReport);
 sessionRouter.patch("/:id/deactivate", requireAuth, requireAdmin, deactivateExistingSession);
 sessionRouter.delete("/:id", requireAuth, requireAdmin, deleteExistingSession);
 

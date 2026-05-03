@@ -7,6 +7,8 @@ type SessionSummary = {
   id: string;
   sessionName: string;
   sessionCode: string;
+  problemTitle?: string;
+  durationMinutes?: number;
   isActive: boolean;
   createdAt: string;
 };
@@ -37,6 +39,12 @@ export function AdminDashboard() {
   const [sessionUsers, setSessionUsers] = useState<Record<string, SessionUser[]>>({});
   const [generatedCode, setGeneratedCode] = useState("");
   const [sessionName, setSessionName] = useState("");
+  const [problemTitle, setProblemTitle] = useState("");
+  const [problemDescription, setProblemDescription] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState<string>("60");
+  const [testCases, setTestCases] = useState<Array<{ input: string; expectedOutput: string; isHidden: boolean }>>([
+    { input: "", expectedOutput: "", isHidden: false }
+  ]);
   const [message, setMessage] = useState("");
   const [loadError, setLoadError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -136,7 +144,11 @@ export function AdminDashboard() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          sessionName
+          sessionName,
+          problemTitle,
+          problemDescription,
+          durationMinutes: durationMinutes ? parseInt(durationMinutes, 10) : undefined,
+          testCases: testCases.filter((tc) => tc.input || tc.expectedOutput)
         })
       });
 
@@ -153,6 +165,10 @@ export function AdminDashboard() {
 
       setGeneratedCode(data.sessionCode ?? "");
       setSessionName("");
+      setProblemTitle("");
+      setProblemDescription("");
+      setDurationMinutes("60");
+      setTestCases([{ input: "", expectedOutput: "", isHidden: false }]);
 
       const refreshResponse = await fetch("/api/sessions", {
         cache: "no-store"
@@ -267,7 +283,7 @@ export function AdminDashboard() {
       </div>
 
       <div className="panel-surface rounded-[2rem] p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-6">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">
               Admin Control
@@ -277,18 +293,107 @@ export function AdminDashboard() {
               Each session is a clean interview room with isolated logs and trust scores.
             </p>
           </div>
-          <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row">
+          <div className="flex w-full flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <input
+                value={sessionName}
+                onChange={(event) => setSessionName(event.target.value)}
+                placeholder="Session Name (e.g. Technical Interview)"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+              />
+              <input
+                value={durationMinutes}
+                onChange={(event) => setDurationMinutes(event.target.value)}
+                type="number"
+                placeholder="Duration (Minutes)"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+              />
+            </div>
+            
             <input
-              value={sessionName}
-              onChange={(event) => setSessionName(event.target.value)}
-              placeholder="Session name"
+              value={problemTitle}
+              onChange={(event) => setProblemTitle(event.target.value)}
+              placeholder="Coding Problem Title"
               className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
             />
+            
+            <textarea
+              value={problemDescription}
+              onChange={(event) => setProblemDescription(event.target.value)}
+              placeholder="Problem Description / Requirements"
+              rows={4}
+              className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+            />
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">Test Cases</h3>
+                <button
+                  type="button"
+                  onClick={() => setTestCases([...testCases, { input: "", expectedOutput: "", isHidden: false }])}
+                  className="text-xs text-cyan-300 hover:text-cyan-200"
+                >
+                  + Add Test Case
+                </button>
+              </div>
+              {testCases.map((tc, idx) => (
+                <div key={idx} className="flex flex-col gap-2 rounded-xl border border-white/5 bg-slate-950/50 p-4 sm:flex-row sm:items-start">
+                  <textarea
+                    value={tc.input}
+                    onChange={(e) => {
+                      const newTcs = [...testCases];
+                      newTcs[idx].input = e.target.value;
+                      setTestCases(newTcs);
+                    }}
+                    placeholder="Input (stdin)"
+                    rows={2}
+                    className="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                  />
+                  <textarea
+                    value={tc.expectedOutput}
+                    onChange={(e) => {
+                      const newTcs = [...testCases];
+                      newTcs[idx].expectedOutput = e.target.value;
+                      setTestCases(newTcs);
+                    }}
+                    placeholder="Expected Output (stdout)"
+                    rows={2}
+                    className="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                  />
+                  <div className="flex items-center gap-3 sm:flex-col sm:items-end">
+                    <label className="flex items-center gap-2 text-xs text-slate-400">
+                      <input
+                        type="checkbox"
+                        checked={tc.isHidden}
+                        onChange={(e) => {
+                          const newTcs = [...testCases];
+                          newTcs[idx].isHidden = e.target.checked;
+                          setTestCases(newTcs);
+                        }}
+                        className="rounded border-white/20 bg-slate-950"
+                      />
+                      Hidden
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newTcs = testCases.filter((_, i) => i !== idx);
+                        setTestCases(newTcs.length ? newTcs : [{ input: "", expectedOutput: "", isHidden: false }]);
+                      }}
+                      className="text-xs text-rose-400 hover:text-rose-300"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <button
               type="button"
               onClick={handleCreateSession}
-              disabled={isCreating || !sessionName.trim()}
-              className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={isCreating || !sessionName.trim() || !problemTitle.trim()}
+              className="mt-2 w-full sm:w-auto self-start rounded-2xl bg-cyan-300 px-8 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isCreating ? "Creating..." : "Create New Session"}
             </button>
@@ -347,10 +452,24 @@ export function AdminDashboard() {
                   Created {new Date(session.createdAt).toLocaleString()}
                 </p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <div className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-2 text-sm text-slate-200">
                   {session.isActive ? "Active" : "Inactive"}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = `/api/sessions/${session.id}/report`;
+                    link.download = `session_report_${session.sessionCode}.csv`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-100 transition hover:bg-indigo-500/20"
+                >
+                  📥 Download Report
+                </button>
                 <button
                   type="button"
                   onClick={() => handleDeactivateSession(session.id)}
