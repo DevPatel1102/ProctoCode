@@ -154,6 +154,15 @@ html[data-theme="light"] .text-cyan-100 {
   color: #115e59 !important;
 }
 
+html[data-theme="light"] .text-teal-300,
+html[data-theme="light"] .text-teal-200 {
+  color: #0f766e !important;
+}
+
+html[data-theme="light"] .text-indigo-100 {
+  color: #3730a3 !important;
+}
+
 html[data-theme="light"] .bg-cyan-300 {
   background-color: #14b8a6 !important;
 }
@@ -185,8 +194,17 @@ html[data-theme="light"] .hover\:bg-cyan-200:hover {
 }
 
 html[data-theme="light"] .text-rose-200,
-html[data-theme="light"] .text-rose-100 {
+html[data-theme="light"] .text-rose-100,
+html[data-theme="light"] .text-rose-100\/90 {
   color: #9f1239 !important;
+}
+
+html[data-theme="light"] .text-rose-300 {
+  color: #be123c !important;
+}
+
+html[data-theme="light"] .text-rose-400 {
+  color: #e11d48 !important;
 }
 
 html[data-theme="light"] .text-amber-200,
@@ -197,6 +215,10 @@ html[data-theme="light"] .text-amber-100 {
 html[data-theme="light"] .text-emerald-200,
 html[data-theme="light"] .text-emerald-100 {
   color: #065f46 !important;
+}
+
+html[data-theme="light"] .text-emerald-300 {
+  color: #047857 !important;
 }
 
 html[data-theme="light"] .bg-rose-500\/10 {
@@ -211,13 +233,20 @@ html[data-theme="light"] .bg-emerald-500\/10 {
   background-color: rgba(16, 185, 129, 0.14) !important;
 }
 
+html[data-theme="light"] .bg-emerald-500\/20 {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+}
+
 html[data-theme="light"] .bg-rose-600\/20 {
   background-color: rgba(225, 29, 72, 0.18) !important;
 }
 
+html[data-theme="light"] .bg-indigo-500\/10 {
+  background-color: rgba(99, 102, 241, 0.14) !important;
+}
+
 html[data-theme="light"] .border-rose-400\/30,
-html[data-theme="light"] .border-rose-500\/40,
-html[data-theme="light"] .border-rose-400\/30 {
+html[data-theme="light"] .border-rose-500\/40 {
   border-color: rgba(225, 29, 72, 0.35) !important;
 }
 
@@ -229,4 +258,89 @@ html[data-theme="light"] .border-amber-500\/40 {
 html[data-theme="light"] .border-emerald-400\/30,
 html[data-theme="light"] .border-emerald-500\/40 {
   border-color: rgba(5, 150, 105, 0.35) !important;
+}
+
+html[data-theme="light"] .border-indigo-400\/30 {
+  border-color: rgba(67, 56, 202, 0.3) !important;
+}
+
+/* Additional dark bg surfaces used in components */
+html[data-theme="light"] .bg-slate-950\/50,
+html[data-theme="light"] .bg-slate-950\/95,
+html[data-theme="light"] .bg-slate-900\/80 {
+  background-color: rgba(248, 250, 252, 0.88) !important;
+}
+
+html[data-theme="light"] .bg-slate-900 {
+  background-color: #f1f5f9 !important;
+}
+
+/* Borders */
+html[data-theme="light"] .border-white\/5 {
+  border-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+/* Hover states */
+html[data-theme="light"] .hover\:border-rose-300:hover {
+  border-color: rgba(225, 29, 72, 0.4) !important;
+}
+
+html[data-theme="light"] .hover\:text-rose-200:hover {
+  color: #be123c !important;
+}
+
+html[data-theme="light"] .hover\:bg-rose-500\/20:hover {
+  background-color: rgba(244, 63, 94, 0.2) !important;
+}
+
+html[data-theme="light"] .hover\:bg-rose-600\/30:hover {
+  background-color: rgba(225, 29, 72, 0.22) !important;
+}
+
+html[data-theme="light"] .hover\:bg-indigo-500\/20:hover {
+  background-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+html[data-theme="light"] .hover\:border-teal-300:hover {
+  border-color: rgba(15, 118, 110, 0.4) !important;
+}
+
+html[data-theme="light"] .hover\:bg-teal-400\/10:hover {
+  background-color: rgba(20, 184, 166, 0.14) !important;
+}
+
+/* Shadow overrides */
+html[data-theme="light"] .shadow-slate-950\/30,
+html[data-theme="light"] .shadow-slate-950\/20,
+html[data-theme="light"] .shadow-rose-950\/20 {
+  --tw-shadow-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+/* Selection */
+html[data-theme="light"] ::selection {
+  background: rgba(14, 165, 233, 0.2);
+  color: #0f172a;
+}
+
+/* Code sandbox pre blocks - keep dark for readability */
+html[data-theme="light"] .bg-slate-950 pre,
+html[data-theme="light"] pre.bg-slate-950 {
+  color: #1e293b !important;
+}
+
+/* Gradient buttons keep their color in light mode */
+html[data-theme="light"] .bg-gradient-to-r.from-emerald-500 {
+  color: white !important;
+}
+
+html[data-theme="light"] .bg-teal-400 {
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .bg-indigo-500 {
+  color: white !important;
+}
+
+html[data-theme="light"] .bg-rose-400 {
+  color: #0f172a !important;
 }

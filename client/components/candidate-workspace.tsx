@@ -332,11 +332,10 @@ export function CandidateWorkspace() {
                   type="button"
                   onClick={handleSubmitCode}
                   disabled={isSubmittingFinal || isSubmitted || !currentCode || isSessionEnded}
-                  className={`rounded-2xl px-5 py-3 text-sm font-semibold transition whitespace-nowrap ${
-                    isSubmitted
+                  className={`rounded-2xl px-5 py-3 text-sm font-semibold transition whitespace-nowrap ${isSubmitted
                       ? "bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 cursor-not-allowed"
                       : "bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   {isSubmitted ? "✅ Submitted" : isSubmittingFinal ? "Submitting..." : "Submit Code"}
                 </button>
@@ -357,7 +356,7 @@ export function CandidateWorkspace() {
             ) : null}
           </div>
           <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr]">
-            
+
             {/* Problem Panel */}
             {sessionDetails?.session?.problemTitle ? (
               <div className="flex flex-col gap-4 overflow-y-auto rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-xl shadow-slate-950/30">
@@ -367,7 +366,7 @@ export function CandidateWorkspace() {
                 <div className="prose prose-invert text-sm text-slate-300">
                   <p className="whitespace-pre-wrap">{sessionDetails.session.problemDescription}</p>
                 </div>
-                
+
                 {sessionDetails.session.testCases?.some((tc: any) => !tc.isHidden) && (
                   <div className="mt-4 pt-4 border-t border-white/10">
                     <h4 className="text-sm font-semibold text-white mb-3">Public Test Cases</h4>
@@ -375,13 +374,13 @@ export function CandidateWorkspace() {
                       {sessionDetails.session.testCases
                         ?.filter((tc: any) => !tc.isHidden)
                         .map((tc: any, idx: number) => (
-                        <div key={idx} className="rounded-xl border border-white/5 bg-slate-950/50 p-3">
-                          <p className="text-xs text-slate-400 mb-1">Input:</p>
-                          <pre className="text-sm text-white bg-slate-900 p-2 rounded">{tc.input}</pre>
-                          <p className="text-xs text-slate-400 mt-2 mb-1">Expected Output:</p>
-                          <pre className="text-sm text-white bg-slate-900 p-2 rounded">{tc.expectedOutput}</pre>
-                        </div>
-                      ))}
+                          <div key={idx} className="rounded-xl border border-white/5 bg-slate-950/50 p-3">
+                            <p className="text-xs text-slate-400 mb-1">Input:</p>
+                            <pre className="text-sm text-white bg-slate-900 p-2 rounded">{tc.input}</pre>
+                            <p className="text-xs text-slate-400 mt-2 mb-1">Expected Output:</p>
+                            <pre className="text-sm text-white bg-slate-900 p-2 rounded">{tc.expectedOutput}</pre>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 )}
@@ -390,7 +389,7 @@ export function CandidateWorkspace() {
 
             {/* Code Sandbox Panel */}
             <div className="flex flex-col gap-4 relative min-w-0">
-              <CodeSandbox 
+              <CodeSandbox
                 onCodeChange={(code) => setCurrentCode(code)}
                 onLanguageChange={(lang) => setCurrentLanguage(lang as "javascript" | "python")}
                 headerActions={
@@ -406,34 +405,34 @@ export function CandidateWorkspace() {
                   ) : null
                 }
               />
-              
+
               {sessionDetails?.session?.testCases?.length > 0 && testResults && (
                 <div className="flex flex-col gap-4">
                   <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-xl shadow-slate-950/30">
-                      <h3 className="text-lg font-semibold text-white mb-4">Test Results</h3>
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {testResults.map((res: any, idx: number) => (
-                          <div key={idx} className={`rounded-xl border p-4 ${res.passed ? "border-emerald-400/30 bg-emerald-500/10" : "border-rose-400/30 bg-rose-500/10"}`}>
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xl">{res.passed ? "✅" : "❌"}</span>
-                              <span className="font-medium text-white">Test Case {idx + 1} {res.isHidden ? "(Hidden)" : ""}</span>
-                            </div>
-                            {!res.passed && !res.isHidden && (
-                              <div className="mt-3 grid gap-2 text-sm">
-                                <div>
-                                  <span className="text-slate-400">Expected:</span>
-                                  <pre className="mt-1 bg-slate-950 p-2 rounded text-emerald-300">{res.expectedOutput}</pre>
-                                </div>
-                                <div>
-                                  <span className="text-slate-400">Actual:</span>
-                                  <pre className="mt-1 bg-slate-950 p-2 rounded text-rose-300">{res.actualOutput || res.error || "<No output>"}</pre>
-                                </div>
-                              </div>
-                            )}
+                    <h3 className="text-lg font-semibold text-white mb-4">Test Results</h3>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {testResults.map((res: any, idx: number) => (
+                        <div key={idx} className={`rounded-xl border p-4 ${res.passed ? "border-emerald-400/30 bg-emerald-500/10" : "border-rose-400/30 bg-rose-500/10"}`}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xl">{res.passed ? "✅" : "❌"}</span>
+                            <span className="font-medium text-white">Test Case {idx + 1} {res.isHidden ? "(Hidden)" : ""}</span>
                           </div>
-                        ))}
-                      </div>
+                          {!res.passed && !res.isHidden && (
+                            <div className="mt-3 grid gap-2 text-sm">
+                              <div>
+                                <span className="text-slate-400">Expected:</span>
+                                <pre className="mt-1 bg-slate-950 p-2 rounded text-emerald-300">{res.expectedOutput}</pre>
+                              </div>
+                              <div>
+                                <span className="text-slate-400">Actual:</span>
+                                <pre className="mt-1 bg-slate-950 p-2 rounded text-rose-300">{res.actualOutput || res.error || "<No output>"}</pre>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
+                  </div>
                 </div>
               )}
 
