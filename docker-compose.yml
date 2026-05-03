@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - server/.env
+    environment:
+      - PORT=5000
+      # Ensure MongoDB uses the compose service if the URI isn't already set to external
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/proctocode}
+      # Required for Next.js app running inside docker on port 3000
+      - CLIENT_ORIGIN=http://localhost:3000
+    depends_on:
+      - mongodb
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # Internal backend URL for Server Side Rendering (SSR) API calls
+      - BACKEND_URL=http://server:5000
+      # Public socket URL exposed to the browser
+      - NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+    depends_on:
+      - server
+
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
