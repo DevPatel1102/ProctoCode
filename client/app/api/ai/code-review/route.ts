@@ -1,0 +1,84 @@
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+
+import { AUTH_COOKIE_NAME, getBackendUrl } from "@/lib/auth";
+
+export async function GET(request: Request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+
+  if (!token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const sessionId = searchParams.get("sessionId");
+  const userId = searchParams.get("userId");
+
+  if (!sessionId || !userId) {
+    return NextResponse.json(
+      { message: "sessionId and userId are required" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const backendResponse = await fetch(
+      `${getBackendUrl()}/api/ai/code-review?sessionId=${sessionId}&userId=${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        cache: "no-store"
+      }
+    );
+
+    const data = await backendResponse.json();
+
+    return NextResponse.json(data, {
+      status: backendResponse.status
+    });
+  } catch {
+    return NextResponse.json(
+      { message: "Backend server is unavailable. Please make sure the server is running." },
+      { status: 503 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+
+  if (!token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json();
+
+  try {
+    const backendResponse = await fetch(
+      `${getBackendUrl()}/api/ai/code-review`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+        cache: "no-store"
+      }
+    );
+
+    const data = await backendResponse.json();
+
+    return NextResponse.json(data, {
+      status: backendResponse.status
+    });
+  } catch {
+    return NextResponse.json(
+      { message: "Backend server is unavailable. Please make sure the server is running." },
+      { status: 503 }
+    );
+  }
+}

@@ -4,6 +4,7 @@ import { Log } from "../models/log.model.js";
 import { Session } from "../models/session.model.js";
 import { UserSession } from "../models/user-session.model.js";
 import type { LogType } from "../models/log.model.js";
+import { reviewCode } from "./ai.service.js";
 
 const TRUST_SCORE_RULES: Partial<Record<LogType, number>> = {
   TAB_HIDDEN: 10,
@@ -208,6 +209,30 @@ export async function submitCandidateCode(userId: string, sessionId: string, cod
   userSession.submittedAt = new Date();
   userSession.lastActivity = new Date();
   await userSession.save();
+
+  // Fire-and-forget AI code review
+  Session.findById(sessionId)
+    .then((session) => {
+      if (!session) return;
+
+      return reviewCode({
+        code,
+        language: "javascript",
+        problemTitle: session.problemTitle || "Untitled Problem",
+        problemDescription: session.problemDescription || ""
+      });
+    })
+    .then((review) => {
+      if (review) {
+        return UserSession.updateOne(
+          { _id: userSession._id },
+          { $set: { aiCodeReview: review } }
+        );
+      }
+    })
+    .catch((error) => {
+      console.error("[session.service] Background AI review failed:", error);
+    });
 
   return userSession;
 }

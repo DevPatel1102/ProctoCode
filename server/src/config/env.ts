@@ -28,5 +28,6 @@ export const env = {
   smtpSecure: getOptionalEnv("SMTP_SECURE", "false") === "true",
   smtpUser: getOptionalEnv("SMTP_USER"),
   smtpPass: getOptionalEnv("SMTP_PASS"),
-  smtpFrom: getOptionalEnv("SMTP_FROM")
+  smtpFrom: getOptionalEnv("SMTP_FROM"),
+  groqApiKey: getOptionalEnv("GROQ_API_KEY")
 };

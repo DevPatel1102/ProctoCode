@@ -1,15 +1,16 @@
 import type { Request, Response } from "express";
 
-import { syntaxCheckCode, submitCode } from "../services/sandbox.service.js";
+import { runCode, syntaxCheckCode, submitCode } from "../services/sandbox.service.js";
 import { Session } from "../models/session.model.js";
 
-const supportedLanguages = new Set(["javascript", "python"]);
+const supportedLanguages = new Set(["javascript", "python", "java", "c", "cpp"]);
 
 export async function executeCode(request: Request, response: Response) {
   try {
-    const { code, language } = request.body as {
+    const { code, language, stdin } = request.body as {
       code?: string;
       language?: string;
+      stdin?: string;
     };
 
     if (!code || !language) {
@@ -30,10 +31,11 @@ export async function executeCode(request: Request, response: Response) {
       });
     }
 
-    const result = await syntaxCheckCode(
+    const result = await runCode({
       code,
-      language as "javascript" | "python"
-    );
+      language: language as "javascript" | "python" | "java" | "c" | "cpp",
+      stdin: stdin ?? ""
+    });
 
     return response.status(200).json(result);
   } catch (error) {
@@ -82,7 +84,7 @@ export async function submitCodeForSession(request: Request, response: Response)
 
     const results = await submitCode(
       code,
-      language as "javascript" | "python",
+      language as "javascript" | "python" | "java" | "c" | "cpp",
       testCases
     );
 

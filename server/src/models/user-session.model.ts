@@ -9,6 +9,18 @@ export interface UserSessionDocument {
   leftAt?: Date | null;
   submittedCode?: string | null;
   submittedAt?: Date | null;
+  aiCodeReview?: {
+    qualityScore: number;
+    timeComplexity: string;
+    spaceComplexity: string;
+    approach: string;
+    readability: string;
+    issues: string[];
+    strengths: string[];
+    suggestions: string[];
+    summary: string;
+    reviewedAt: Date;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,6 +62,10 @@ const userSessionSchema = new Schema<UserSessionDocument>(
     },
     submittedAt: {
       type: Date,
+      default: null
+    },
+    aiCodeReview: {
+      type: Schema.Types.Mixed,
       default: null
     }
   },

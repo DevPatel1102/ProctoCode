@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { AdminUserMonitor } from "@/components/admin-user-monitor";
+import { AiBehaviorAnalysis } from "@/components/ai-behavior-analysis";
+import { AiCodeReview } from "@/components/ai-code-review";
 import { AUTH_COOKIE_NAME, getBackendUrl } from "@/lib/auth";
 import { type LiveBehaviorEvent } from "@/lib/monitor";
 
@@ -28,6 +30,19 @@ type SessionUser = {
   lastActivity: string;
   leftAt: string | null;
 };
+
+type AiCodeReviewData = {
+  qualityScore: number;
+  timeComplexity: string;
+  spaceComplexity: string;
+  approach: string;
+  readability: string;
+  issues: string[];
+  strengths: string[];
+  suggestions: string[];
+  summary: string;
+  reviewedAt: string;
+} | null;
 
 async function getToken() {
   const cookieStore = await cookies();
@@ -86,6 +101,36 @@ async function getUserEvents(token: string, sessionId: string, userId: string) {
   return data.events;
 }
 
+async function getAiCodeReview(token: string, sessionId: string, userId: string) {
+  try {
+    const response = await fetch(
+      `${getBackendUrl()}/api/ai/code-review?sessionId=${sessionId}&userId=${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        cache: "no-store"
+      }
+    );
+
+    if (!response.ok) {
+      return { review: null, hasSubmittedCode: false };
+    }
+
+    const data = (await response.json()) as {
+      review: AiCodeReviewData;
+      hasSubmittedCode: boolean;
+    };
+
+    return {
+      review: data.review ?? null,
+      hasSubmittedCode: data.hasSubmittedCode ?? false
+    };
+  } catch {
+    return { review: null, hasSubmittedCode: false };
+  }
+}
+
 export default async function AdminUserMonitorPage({ params }: PageProps) {
   const token = await getToken();
   const { sessionId, userId } = await params;
@@ -94,10 +139,11 @@ export default async function AdminUserMonitorPage({ params }: PageProps) {
     return null;
   }
 
-  const [sessions, users, events] = await Promise.all([
+  const [sessions, users, events, aiReview] = await Promise.all([
     getSessions(token),
     getSessionUsers(token, sessionId),
-    getUserEvents(token, sessionId, userId)
+    getUserEvents(token, sessionId, userId),
+    getAiCodeReview(token, sessionId, userId)
   ]);
 
   const session = sessions.find((item) => item.id === sessionId) ?? null;
@@ -135,14 +181,31 @@ export default async function AdminUserMonitorPage({ params }: PageProps) {
         </div>
       </div>
 
-      <AdminUserMonitor
-        sessionId={sessionId}
-        userId={userId}
-        sessionCode={session.sessionCode}
-        userEmail={user.email}
-        initialEvents={events}
-        token={token}
-      />
+      <div className="space-y-8">
+        <AdminUserMonitor
+          sessionId={sessionId}
+          userId={userId}
+          sessionCode={session.sessionCode}
+          userEmail={user.email}
+          initialEvents={events}
+          token={token}
+        />
+
+        <AiBehaviorAnalysis
+          sessionId={sessionId}
+          userId={userId}
+          userEmail={user.email}
+          eventCount={events.length}
+        />
+
+        <AiCodeReview
+          sessionId={sessionId}
+          userId={userId}
+          userEmail={user.email}
+          initialReview={aiReview.review}
+          hasSubmittedCode={aiReview.hasSubmittedCode}
+        />
+      </div>
     </main>
   );
 }
